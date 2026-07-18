@@ -6,15 +6,15 @@ The PrintFarmHQ Edge Agent is a small local service that connects the 3D printer
 
 ## Install
 
-PrintFarmHQ generates a personalized one-line install command for you in the dashboard (**Connect Printers** tab), including a one-time edge API key:
+PrintFarmHQ shows a keyless one-line install command in the dashboard (**Connect Printers** tab). The one-time edge API key is displayed separately:
 
 ```bash
-curl -fsSL https://github.com/PrintFarmHQ/edge-agent-releases/releases/latest/download/install.sh | sh -s -- --api-key 'pfh_edge_xxx' --control-plane-url 'https://app.printfarmhq.io/api'
+curl -fsSL https://github.com/PrintFarmHQ/edge-agent-releases/releases/latest/download/install.sh | sh -s -- --control-plane-url 'https://app.printfarmhq.io/api'
 ```
 
 To install a specific version instead of the latest, add `--version vX.Y.Z`.
 
-To update later, re-run the command without `--api-key`: the installer refreshes the binaries and restarts the service, keeping your existing pairing.
+The installer asks for the separately displayed key through `/dev/tty`, or directs you to the loopback dashboard. To update later, re-run the same command: it refreshes the binaries and restarts the service while preserving pairing.
 
 ## What the installer does
 
@@ -23,12 +23,13 @@ To update later, re-run the command without `--api-key`: the installer refreshes
 1. Detects your CPU architecture (Apple Silicon `arm64` or Intel `amd64`).
 2. Downloads the matching `edge-agent` and `edge-helper` binaries from this repository's release.
 3. Verifies every download against the release's `checksums.txt` (SHA-256) and aborts on any mismatch.
-4. Installs the binaries under `~/.printfarmhq/bin/`.
-5. Installs a user LaunchAgent (`io.printfarmhq.edge-agent`) so the agent starts with your session.
-6. Installs a root LaunchDaemon (`io.printfarmhq.edge-helper`) with a single `sudo` prompt. The helper is the only privileged process, and it exists solely for operations that require root on macOS (such as standard printer ports and local network aliases used for slicer connectivity).
-7. Pairs with your PrintFarmHQ account through the agent's local setup API. Your edge API key is handed over locally and is **never written into launchd plist files**.
+4. If it finds a legacy root-managed installation, asks once for administrator access, stops only the recognized owner-specific legacy agent, and transfers the canonical local state to your user without changing its contents or modes.
+5. Installs the binaries under `~/.printfarmhq/bin/`.
+6. Installs a user LaunchAgent (`io.printfarmhq.edge-agent`) so the agent starts with your session.
+7. Installs a root LaunchDaemon (`io.printfarmhq.edge-helper`) with a single `sudo` prompt. The helper is the only privileged process, and it exists solely for operations that require root on macOS (such as standard printer ports and local network aliases used for slicer connectivity).
+8. Pairs through the agent's local setup API. Your edge API key is handed over locally and is **never placed in the managed process arguments, logs, or launchd plist files**.
 
-After installation, the agent's local dashboard is available at `http://localhost:18800`.
+After installation, the agent's local dashboard is available at `http://localhost:18090`.
 
 Flags: `--no-privileged` skips the root helper entirely (some printer features degrade gracefully); `--version` pins a release; `--uninstall` and `--purge` are described below.
 
@@ -41,7 +42,7 @@ curl -fsSLO https://github.com/PrintFarmHQ/edge-agent-releases/releases/latest/d
 curl -fsSLO https://github.com/PrintFarmHQ/edge-agent-releases/releases/latest/download/checksums.txt
 shasum -a 256 -c checksums.txt --ignore-missing   # verifies install.sh
 less install.sh                                    # read what it does
-sh install.sh --api-key 'pfh_edge_xxx' --control-plane-url 'https://app.printfarmhq.io/api'
+sh install.sh --control-plane-url 'https://app.printfarmhq.io/api'
 ```
 
 ## Supported platforms
