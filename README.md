@@ -47,7 +47,7 @@ sh install.sh --control-plane-url 'https://app.printfarmhq.io/api'
 
 ## Supported platforms
 
-- macOS on Apple Silicon (`arm64`) and Intel (`amd64`).
+- Edge Agent v0.3.1 requires macOS 26 or later on both Apple Silicon (`arm64`) and Intel (`amd64`). The complete v0.3.0 installation had the same minimum.
 - Linux and Windows are not supported yet.
 
 ## Code signing status
